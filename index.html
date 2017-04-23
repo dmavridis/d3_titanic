@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
+		<style type="text/css">
+			div.descrbox {
+				position: fixed;
+				top: 220px;
+				left: 720px;
+				margin: 30px;
+				width: 90px;
+				background-color: #ffffff;
+			}
+			div.descrbox p {
+
+				font-size: 12px;
+				font-family: Verdana
+				color: #000000;
+			}
+			div.group_buttons {
+				position: fixed;
+				top: 70px;
+				left: 750px;
+				width: 85px;
+			}
+			div.group_buttons div {
+				background-color: #F6F6F6;
+				padding: 2px;
+				margin: 4px;
+				cursor: pointer;
+				border: 1px solid;
+				font-family: Verdana;
+				font-size: 14px;
+			}	
+		</style>
+
+    <script type="text/javascript">
+    function draw(data) {
+
+		// Setting of the html components
+
+        "use strict";
+        var margin = 75,
+            width = 800 - margin,
+            height = 500 - margin;
+
+		// Svg generation
+        var svg = d3.select("body")
+            .append("svg")
+            .attr("width", width + margin)
+			.attr("height", height + margin)
+			.append('g')
+            .attr('class','chart');
+		
+		// Titles of the buttons 
+		var option = ["Summary", "Age", "Age %", "Class", "Class %"]
+
+        //Definition of the buttons
+        var buttons_option = d3.select("body")
+			.append("div")
+			.attr("class", "group_buttons")
+			.selectAll("div")
+			.data(option)
+			.enter()
+			.append("div")
+			.text(function(d) {
+			return d;
+			});			
+
+        // Dimple.js Chart construction code
+		function chartDraw(option) {
+			// Filtering of the data to use only the survived passengers data
+			var filteredData = dimple.filterData(data, "Survival Status", "Survived");
+
+			if(option == "Summary") {
+			// 1st summary graph showing Lost and Survived Passengers count
+				var myChart = new dimple.chart(svg, data);
+				var x = myChart.addCategoryAxis("x", "Survival Status");
+				var y = myChart.addMeasureAxis("y", "Count");
+				y.title = "Count of Survived and Lost passengers";
+				y.overrideMax = 600;
+				myChart.addSeries( "Survival Status", dimple.plot.bar);
+				myChart.defaultColors = [
+					new dimple.color("black"),
+					new dimple.color("green")];
+				var description = "Summary statistics of Survived passengers. Out of the 891 \
+					available data 342 survived [38.4%]. Click the buttons to see detailed \
+					information according to categories.";
+				var title_text = "Overview of Survival Status";
+				} 
+			else if(option == "Age" ) {
+				// Bar plot of Age data split into categories, plotting the count
+				// of survived passengers filtered by sex
+				var myChart = new dimple.chart(svg, filteredData);
+				var x = myChart.addCategoryAxis("x", ["Age Group","Sex"]);
+				x.addOrderRule(["Child","Young","Senior","NA"]);
+				x.title = "Passengers by Age Group (Child [<14], Young [14 - 40], Senior [>40])";
+				var title_text = "Count of Survived Passengers per Age group and per Sex"
+				var y = myChart.addMeasureAxis("y", "Count");
+				myChart.addSeries("Sex", dimple.plot.bar,[x, y]);
+				y.overrideMax = 150;
+				y.title = "Number of Survived Passengers";
+				var description = "Female Adults have the highest survival count. \
+					Check the % to see if their probability is also high"
+				myChart.defaultColors = [
+					new dimple.color("pink"),
+					new dimple.color("#7EC0EE")];
+				} 
+			else if(option == "Age %") {
+				// Scatter and line plot of % Survived passengers split by Age group amd filtered by sex
+				var myChart = new dimple.chart(svg, filteredData);
+				var x = myChart.addCategoryAxis("x", "Age Group");
+				x.title = "Passengers by Age Group (Child [<14], Young [14 - 40], Senior [>40])";
+				var title_text = "Count of Survived Passengers per Age group and per Sex"
+				x.addOrderRule(["Child","Young","Senior","NA"]);
+				var title_text = "Percentage of Survived Passengers per Age group and per Sex"
+				var y = myChart.addMeasureAxis("y", "Count % Age Sex");
+				myChart.addSeries("Sex", dimple.plot.bubble,[x, y]);
+				myChart.addSeries("Sex", dimple.plot.line,[x, y]);
+				y.overrideMax = 100;
+				y.title = "Percentage of Survived Passengers";
+				var description = "Females have significantly higher probability of survival"
+				myChart.defaultColors = [
+					new dimple.color("pink"),
+					new dimple.color("#7EC0EE")];
+				} 
+			else if(option == "Class %") {
+				// Scatter and line plot of % Survived passengers split by Passenger Class amd filtered by sex
+				var myChart = new dimple.chart(svg, filteredData);
+				var x = myChart.addCategoryAxis("x", "Pclass");
+				x.title = "Passenger Class";
+				var title_text = "Percentage of Survived Passengers per Passenger class and per Sex"
+				var y = myChart.addMeasureAxis("y", "Count % Age Pclass");
+				myChart.addSeries("Sex", dimple.plot.bubble,[x, y]);
+				myChart.addSeries("Sex", dimple.plot.line,[x, y]);
+				y.overrideMax = 100;
+				y.title = "Percentage of Survived Passengers";
+				var description = "Females of 1st and 2nd Class are almost guaranteed to survive. \
+					The value drops to 50% for 3rd Class Females. Male probabilities are very slim"
+				myChart.defaultColors = [
+					new dimple.color("pink"),
+					new dimple.color("#7EC0EE")];
+				
+			} else if(option == "Class") {
+				// Bar plot of Passenger Class data split into categories, plotting the count
+				// of survived passengers filtered by sex				
+				var myChart = new dimple.chart(svg, filteredData);
+				var x = myChart.addCategoryAxis("x", ["Pclass", "Sex"]);
+				x.title = "Passenger Class";
+				x.addOrderRule(["1st","2nd","3rd"]);
+				var title_text = "Count of Survived Passengers per Passenger class and per Sex"
+				var y = myChart.addMeasureAxis("y", "Count");
+				myChart.addSeries("Sex", dimple.plot.bar,[x, y]);
+				y.overrideMax = 100;
+				y.title = "Number of Survived Passengers";
+				var description = "Regardless of the Class Female survivors dominate over Male ones"
+				myChart.defaultColors = [
+					new dimple.color("pink"),
+					new dimple.color("#7EC0EE")];
+            }
+			
+			myChart.addLegend(750, 200, 60, 300, "Right");		  	
+
+			// Title function for each option displaying the title_text variable
+			svg.append("text")
+				.attr("x", 400)
+				.attr("y", 15)
+				.attr("text-anchor", "middle")
+				.style("font-size", "20px")
+				.style("font-family", "Tahoma")
+				.text(title_text);
+			
+			// Description box function for each option displaying the description variable
+			// Before creating the new div, the old one, if exists, needs to be removed
+			d3.select(".descrbox").remove()
+			d3.select("body")
+				.append("div")
+                .attr("class", "descrbox")
+				.append("p")
+				.text(description)
+			
+			// Drawing of the chart with a transistion of 0.5s	
+			myChart.draw(500);
+        };
+		
+		// Drawing of chart when page loads
+		chartDraw("Summary");
+		
+		// Adding interaction to the buttons
+        buttons_option.on("click", function(d) {
+            d3.select(".stat_buttons")
+              .selectAll("div")
+			d3.select(this)
+            svg.selectAll("*").remove();
+            chartDraw(d);
+		 });
+
+		};
+		
+    </script>
+  </head>
+<body>
+  <script type="text/javascript">
+	// Reading of the csv data
+    d3.csv("titanic_data_post.csv", function(d) {
+		return d;
+		}, draw);
+
+  </script>
+</body>
+</html>
