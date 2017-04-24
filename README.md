@@ -1,6 +1,6 @@
 ## Make effective data visualization
 
-To see the project: https://bl.ocks.org/dmavridis/d3_titanic
+To see the project: http://bl.ocks.org/dmavridis/3a9053ca97033d8e6eb8d13406f14ece
 
 ### Summary
 The purpose of this project is to investigate the Titanic dataset, which contains demographics and passenger information from a subset of the 2224 passengers and crew on board the Titanic. Through visual representation of data, it will be shown that some particular categories of passengers stood more chance of surviving, especially females of first and second class and between ages 15-40.
